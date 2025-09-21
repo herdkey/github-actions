@@ -1,0 +1,9 @@
+# VCS and tooling
+*.iml
+/.idea/
+/.vscode/
+/.junie/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
