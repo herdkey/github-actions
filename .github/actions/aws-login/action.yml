@@ -32,7 +32,10 @@ runs:
       id: repo-slug
       shell: bash
       run: |
-        echo "REPO_SLUG=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+        echo "REPO_SLUG=${GITHUB_REPOSITORY##*/}" \
+          | tee -a $GITHUB_ENV \
+          | tee -a $GITHUB_OUTPUT \
+          > /dev/null
 
     - name: Configure AWS Credentials via OIDC
       uses: aws-actions/configure-aws-credentials@v4
@@ -45,4 +48,4 @@ runs:
     - name: Print OIDC claims
       shell: bash
       if: ${{ inputs.debug-oidc }}
-      run: ${{ github.action_path }}/scripts/debug-oidc.sh
+      run: ${{ github.action_path }}/scripts/debug_oidc.sh
