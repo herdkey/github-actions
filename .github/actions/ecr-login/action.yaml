@@ -1,22 +1,22 @@
-name: "Docker ECR Build and Push"
-author: "savi"
+name: ECR Login
+author: savi
 description: |
   Log into ECR via OIDC. Ensure repo exists. Derive branch and short-sha tags.
 
 inputs:
   aws-account-id:
-    description: "AWS Account ID that hosts the ECR repo"
+    description: AWS Account ID that hosts the ECR repo
     required: true
   aws-region:
-    description: "AWS Region"
+    description: AWS Region
     required: false
-    default: "us-west-2"
+    default: us-west-2
   env-name:
-    description: "Environment name used for role/repo naming (e.g., dev, prod)"
+    description: Environment name used for role/repo naming (e.g., dev, prod)
     required: false
-    default: "dev"
+    default: dev
   debug-oidc:
-    description: "Enable debug logging for OIDC"
+    description: Enable debug logging for OIDC
     required: false
     default: "false"
   component-name:
@@ -24,28 +24,28 @@ inputs:
       Component name being built (e.g., api, worker).
       This will become the final segment of the ECR repo name.
     required: false
-    default: "api"
+    default: api
   dockerfile:
-    description: "Path to Dockerfile"
+    description: Path to Dockerfile
     required: false
-    default: "docker/Dockerfile"
+    default: docker/Dockerfile
   working-directory:
-    description: "Directory containing Docker context"
+    description: Directory containing Docker context
     required: false
-    default: "."
+    default: .
 
 outputs:
   repo-slug:
-    description: "Repo slug"
+    description: Repo slug
     value: ${{ steps.aws-login.outputs.REPO_SLUG }}
   short-sha:
-    description: "Short SHA of current commit"
+    description: Short SHA of current commit
     value: ${{ steps.define-tags.outputs.SHORT_SHA }}
   sanitized-branch:
-    description: "Branch of current commit"
+    description: Branch of current commit
     value: ${{ steps.define-tags.outputs.SANITIZED_BRANCH }}
   sha-tag:
-    description: "ECR tag using the short SHA as the version. This tag is immutable."
+    description: ECR tag using the short SHA as the version. This tag is immutable.
     value: ${{ steps.define-tags.outputs.SHA_TAG }}
   branch-tag:
     description: |
@@ -54,14 +54,14 @@ outputs:
     value: ${{ steps.define-tags.outputs.BRANCH_TAG }}
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Checkout
       uses: actions/checkout@v5
 
     - name: AWS Login
       id: aws-login
-      uses: ./.github/actions/aws-login
+      uses: .github/actions/aws-login
       with:
         aws-account-id: ${{ inputs.aws-account-id }}
         aws-region: ${{ inputs.aws-region }}

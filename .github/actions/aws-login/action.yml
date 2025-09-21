@@ -1,31 +1,31 @@
-name: "AWS Login"
-author: "savi"
+name: AWS Login
+author: savi
 description: Logs into AWS via OIDC.
 
 inputs:
   aws-account-id:
-    description: "AWS Account ID"
+    description: AWS Account ID
     required: true
   aws-region:
-    description: "AWS Region"
+    description: AWS Region
     required: false
-    default: "us-west-2"
+    default: us-west-2
   env-name:
-    description: "Environment name used for role/repo naming (e.g., dev, prod)"
+    description: Environment name used for role/repo naming (e.g., dev, prod)
     required: false
-    default: "dev"
+    default: dev
   debug-oidc:
-    description: "Enable debug logging for OIDC"
+    description: Enable debug logging for OIDC
     required: false
     default: "false"
 
 outputs:
   repo-slug:
-    description: "Repo slug"
+    description: Repo slug
     value: ${{ steps.repo-slug.outputs.REPO_SLUG }}
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     # GITHUB_REPOSITORY is in the format "owner/repo" so extract the repo name
     - name: Get repo slug
