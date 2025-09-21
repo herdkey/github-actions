@@ -1,0 +1,5 @@
+{
+  extends: [
+    "github>herdkey/renovate-config//renovate/presets/base.json5#v1",
+  ],
+}
