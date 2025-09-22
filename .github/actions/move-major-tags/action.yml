@@ -1,0 +1,25 @@
+name: Retag
+description: Move major (vX) tags, and optionally minor (vX.Y) tags, to a semver tag commit.
+inputs:
+  semver_tag:
+    description: The full semver tag that triggered this (e.g. v1.2.3).
+    required: true
+  update_minor:
+    description: Also move vX.Y (minor) tag.
+    required: false
+    default: "true"
+  dry_run:
+    description: Show what would change without pushing.
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: Move major & minor tags
+      shell: bash
+      env:
+        SEMVER_TAG: ${{ inputs.semver_tag }}
+        UPDATE_MINOR: ${{ inputs.update_minor }}
+        DRY_RUN: ${{ inputs.dry_run }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      run: bash "${{ github.action_path }}/run.sh"
