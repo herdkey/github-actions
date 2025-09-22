@@ -1,9 +1,12 @@
 name: Tag
 
 on:
+  # Run in this repo when a PR is merged to main.
   pull_request:
     types: [closed]
     branches: [main]
+  # Also allow other repos to dispatch it.
+  workflow_call:
 
 permissions:
   contents: write
@@ -20,6 +23,11 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # This will create a new semver tag, by bumping the previous latest tag.
+      # If the commit contains the terms #major or #minor, it will bump by a major or minor version.
+      # Otherwise, it will only increase the patch component.
+      # When merging a PR, make sure the resulting commit message contains one of these terms
+      # if you intend to bump by a major or minor version.
       - name: Bump tag
         id: bump
         uses: anothrNick/github-tag-action@v1
@@ -29,6 +37,8 @@ jobs:
           DEFAULT_BUMP: patch
           RELEASE_BRANCHES: main
 
+      # Move floating major and minor tags to the new semver tag.
+      # e.g., v1 -> v1.2.3 and v1.2 -> v1.2.3
       - name: Retag major & minor
         if: steps.bump.outputs.new_tag != ''
         uses: ./.github/actions/move-major-tags
