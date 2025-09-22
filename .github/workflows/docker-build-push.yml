@@ -72,7 +72,7 @@ jobs:
           component: ${{ inputs.component }}
 
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         if: ${{ inputs.artifact-name != '' }}
         with:
           name: ${{ inputs.artifact-name }}
