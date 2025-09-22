@@ -38,7 +38,7 @@ runs:
           > /dev/null
 
     - name: Configure AWS Credentials via OIDC
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v5
       with:
         role-to-assume: arn:aws:iam::${{ inputs.aws-account-id }}:role/github-repo-${{ env.REPO_SLUG }}-${{ inputs.env-name }}
         role-session-name: ${{ env.REPO_SLUG }}-ci
