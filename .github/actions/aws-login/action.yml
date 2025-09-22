@@ -1,0 +1,51 @@
+name: AWS Login
+author: savi
+description: Logs into AWS via OIDC.
+
+inputs:
+  aws-account-id:
+    description: AWS Account ID
+    required: true
+  aws-region:
+    description: AWS Region
+    required: false
+    default: us-west-2
+  env-name:
+    description: Environment name used for role/repo naming (e.g., dev, prod)
+    required: false
+    default: dev
+  debug-oidc:
+    description: Enable debug logging for OIDC
+    required: false
+    default: "false"
+
+outputs:
+  repo-slug:
+    description: Repo slug
+    value: ${{ steps.repo-slug.outputs.REPO_SLUG }}
+
+runs:
+  using: composite
+  steps:
+    # GITHUB_REPOSITORY is in the format "owner/repo" so extract the repo name
+    - name: Get repo slug
+      id: repo-slug
+      shell: bash
+      run: |
+        echo "REPO_SLUG=${GITHUB_REPOSITORY##*/}" \
+          | tee -a $GITHUB_ENV \
+          | tee -a $GITHUB_OUTPUT \
+          > /dev/null
+
+    - name: Configure AWS Credentials via OIDC
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.aws-account-id }}:role/github-repo-${{ env.REPO_SLUG }}-${{ inputs.env-name }}
+        role-session-name: ${{ env.REPO_SLUG }}-ci
+        aws-region: ${{ inputs.aws-region }}
+        role-duration-seconds: 3600
+
+    - name: Print OIDC claims
+      shell: bash
+      if: ${{ inputs.debug-oidc }}
+      run: ${{ github.action_path }}/scripts/debug_oidc.sh

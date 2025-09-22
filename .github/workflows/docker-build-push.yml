@@ -1,0 +1,103 @@
+name: Docker Build & Push
+
+on:
+  workflow_call:
+    inputs:
+      aws-account-id:
+        type: string
+        description: AWS Account ID
+        required: false
+        default: "073835883885"   # infra account, where the main ECR registry lives
+      aws-region:
+        type: string
+        description: AWS Region
+        required: false
+        default: us-west-2
+      env-name:
+        type: string
+        description: Environment name used for role/repo naming (e.g., dev, play, stage, prod)
+        required: false
+        default: dev
+      component:
+        type: string
+        description: Component name being built (e.g., api, worker).
+        required: true
+      artifact-name:
+        type: string
+        description: Name of the artifact to download
+        required: false
+        default: ''
+      artifact-path:
+        type: string
+        description: Name of the artifact to download
+        required: false
+        default: './artifacts'
+      build-cmd:
+        type: string
+        description: The script to run to build the image
+        required: false
+        default: './scripts/docker_build.sh'
+      local-image-tag:
+        type: string
+        description: The tag applied by the `just docker-build` recipe
+        required: true
+
+jobs:
+  docker-build-push:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      env_name: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: AWS Login
+        id: aws-login
+        uses: herdkey/github-actions/.github/actions/aws-login@main
+        with:
+          aws-account-id: ${{ inputs.aws-account-id }}
+          aws-region: ${{ inputs.aws-region }}
+          env-name: ${{ inputs.env-name }}
+          debug-oidc: true
+
+      - name: ECR Setup
+        id: ecr-setup
+        uses: herdkey/github-actions/.github/actions/ecr-setup@main
+        with:
+          env-name: ${{ inputs.env-name }}
+          component: ${{ inputs.component }}
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        if: ${{ inputs.artifact-name != '' }}
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.artifact-path }}
+
+      - name: Export envs
+        run: |
+          echo "COMPONENT=${{ inputs.component }}" >> $GITHUB_ENV
+
+      # Run the caller's build command. This must build the docker image
+      # and tag it with ${{ inputs.local-image-tag }}.
+      - name: Build
+        run: ${{ inputs.build-cmd }}
+
+      # Push the mutable branch tag first, then the mutable SHA tag.
+      # Both pushes push the same image layers. ECR deduplicates by layer digest.
+      - name: Push Branch Tag
+        run: |
+          # Tag the image so we can push it to ECR.
+          BRANCH_TAG="${{ steps.ecr-setup.outputs.branch-tag }}"
+          docker tag "${{ inputs.local-image-tag }}" "$BRANCH_TAG"
+          docker push "$BRANCH_TAG"
+
+      - name: Push SHA Tag
+        run: |
+          SHA_TAG="${{ steps.ecr-setup.outputs.sha-tag }}"
+          docker tag "${{ inputs.local-image-tag }}" "$SHA_TAG"
+          docker push "$SHA_TAG"

@@ -1,0 +1,57 @@
+name: ECR Setup
+author: savi
+description: |
+  Log into ECR via OIDC. Ensure repo exists. Derive branch and short-sha tags.
+
+inputs:
+  env-name:
+    description: Environment name used for role/repo naming (e.g., dev, play, stage, prod)
+    required: false
+    default: dev
+  component:
+    description: >-
+      Component name being built (e.g., api, worker).
+      This will become the final segment of the ECR repo name.
+    required: true
+
+outputs:
+  repo-slug:
+    description: Repo slug
+    value: ${{ steps.aws-login.outputs.REPO_SLUG }}
+  short-sha:
+    description: Short SHA of current commit
+    value: ${{ steps.define-tags.outputs.SHORT_SHA }}
+  sanitized-branch:
+    description: Branch of current commit
+    value: ${{ steps.define-tags.outputs.SANITIZED_BRANCH }}
+  sha-tag:
+    description: ECR tag using the short SHA as the version. This tag is immutable.
+    value: ${{ steps.define-tags.outputs.SHA_TAG }}
+  branch-tag:
+    description: |
+      ECR tag using the sanitized branch name as the version.
+      This tag is mutable. It is overwritten on every push to the branch.
+    value: ${{ steps.define-tags.outputs.BRANCH_TAG }}
+
+runs:
+  using: composite
+  steps:
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Ensure ECR repository exists
+      shell: bash
+      run: |
+        REPO_NAME="${{ inputs.env-name }}/$REPO_SLUG/${{ inputs.component }}"
+        aws ecr describe-repositories --repository-names "$REPO_NAME" || \
+        aws ecr create-repository --repository-name "$REPO_NAME"
+
+    - name: Define Tags
+      id: define-tags
+      shell: bash
+      run: "${{ github.action_path }}/scripts/define_tags.sh"
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ENV_NAME: ${{ inputs.env-name }}
+        COMPONENT_NAME: ${{ inputs.component }}

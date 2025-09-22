@@ -1,0 +1,77 @@
+name: Go Build
+
+on:
+  workflow_call:
+    inputs:
+      go-version-file:
+        type: string
+        description: Path to go.mod (used by actions/setup-go)
+        required: false
+        default: go.mod
+      build-output-file:
+        type: string
+        description: Path to the build output file to upload as an artifact (e.g., ./bin/app)
+        required: false
+        default: ''
+      build-artifact-name:
+        type: string
+        description: Name of the artifact to upload
+        required: false
+        default: ''
+    outputs:
+      go-version:
+        description: Go version
+        value: ${{ jobs.build.outputs.go-version }}
+
+jobs:
+  build:
+    name: Go Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ${{ inputs.go-version-file }}
+
+      - name: Setup Just
+        uses: extractions/setup-just@v3
+
+      - name: Setup
+        run: just setup
+
+      - name: Verify generate
+        run: |
+          # Show any diffs from code generation
+          git diff --name-only || true
+          # Fail if there are any diffs. This would have come from generation.
+          git diff --exit-code
+
+      - name: Verify go.mod/go.sum tidy
+        run: |
+          # Ensure dependencies are tidy
+          export GO111MODULE=on
+          go mod tidy
+          git diff --exit-code
+
+      - name: Lint
+        run: just lint
+
+      - name: Run tests
+        run: just test
+
+      - name: Build
+        run: just build
+
+      - name: Archive build
+        if: ${{ inputs.build-artifact-name != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.build-artifact-name }}
+          path: ${{ inputs.build-output-file }}
+          if-no-files-found: error
