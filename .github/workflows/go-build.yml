@@ -18,6 +18,11 @@ on:
         description: Name of the artifact to upload
         required: false
         default: ''
+      just-common-ref:
+        type: string
+        description: The ref of just-common to use
+        required: false
+        default: sav-31-common-just-bash
     outputs:
       go-version:
         description: Go version
@@ -39,10 +44,21 @@ jobs:
         with:
           go-version-file: ${{ inputs.go-version-file }}
 
-      - name: Setup Just
-        uses: extractions/setup-just@v3
+      # Not recommended to install from source:
+      # https://golangci-lint.run/docs/welcome/install/#install-from-sources
+      # This method is recommended for GitHub Actions
+      # https://golangci-lint.run/docs/welcome/install/#github-actions
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
 
-      - name: Setup
+      - name: Setup Just
+        uses: herdkey/github-actions/.github/actions/setup-just@sav-31-common-just-bash
+        with:
+          just-common-ref: ${{ inputs.just-common-ref }}
+
+      - name: Setup Project
         run: just setup
 
       - name: Verify generate

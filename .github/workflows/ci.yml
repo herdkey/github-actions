@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+
+  test-setup-just:
+    name: Test Setup Just
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Setup just
+        uses: ./.github/actions/setup-just
+        with:
+          just-common-ref: sav-31-common-just-bash
+
+      - name: Validate envs
+        run: |
+          # Validate this env var that was set by direnv
+          echo "PROJECT_ROOT: $PROJECT_ROOT"
+          if [ -z "$PROJECT_ROOT" ]; then
+              echo "Expected PROJECT_ROOT to have been set by direnv"
+              exit 1
+          fi
+
+      - name: Validate just
+        run: just validate
