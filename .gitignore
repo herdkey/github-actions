@@ -7,3 +7,7 @@
 # OS/editor junk
 .DS_Store
 Thumbs.db
+
+.venv/
+/.justfiles
+/.justfiles/

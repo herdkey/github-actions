@@ -1,0 +1,47 @@
+name: "Setup just-common"
+
+inputs:
+  just-common-ref:
+    description: "The ref of just-common to use"
+    required: false
+    default: v1
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Just
+      uses: extractions/setup-just@v3
+
+    - name: Check out repository
+      uses: actions/checkout@v5
+      with:
+        repository: herdkey/just-common
+        path: just-common-tmp
+        ref: ${{ inputs.just-common-ref }}
+        fetch-depth: 1
+        sparse-checkout: |
+          justfiles
+
+    - name: Move
+      shell: bash
+      run: |
+        # Move justfiles to .justfiles
+        mv -f just-common-tmp/justfiles .justfiles
+        # Remove the temp folder containing the larger just-common repo
+        rm -rf just-common-tmp
+        # Print out the justfiles directory contents for confirmation
+        echo ".justfiles contents:"
+        ls -lah .justfiles
+
+    - name: Install direnv
+      shell: bash
+      run: |
+        curl -sfL https://direnv.net/install.sh | bash
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    # https://github.com/direnv/direnv/blob/master/docs/github-actions.md
+    - name: Load environment variables
+      shell: bash
+      run: |
+        direnv allow .
+        direnv export gha > "$GITHUB_ENV"
