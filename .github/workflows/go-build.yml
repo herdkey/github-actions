@@ -22,7 +22,7 @@ on:
         type: string
         description: The ref of just-common to use
         required: false
-        default: sav-31-common-just-bash
+        default: v1
     outputs:
       go-version:
         description: Go version

@@ -17,8 +17,6 @@ jobs:
 
       - name: Setup just
         uses: ./.github/actions/setup-just
-        with:
-          just-common-ref: sav-31-common-just-bash
 
       - name: Validate envs
         run: |
