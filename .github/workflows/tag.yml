@@ -2,9 +2,9 @@ name: Tag
 
 on:
   # Run in this repo when a PR is merged to main.
-  pull_request:
-    types: [closed]
-    branches: [main]
+  push:
+    branches:
+      - main
   # Also allow other repos to dispatch it.
   workflow_call:
 
