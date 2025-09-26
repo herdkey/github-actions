@@ -20,7 +20,7 @@ on:
         default: dev
       component:
         type: string
-        description: Component name being built (e.g., api, worker).
+        description: Component name being built (e.g., api, worker)
         required: true
       artifact-name:
         type: string
@@ -34,9 +34,8 @@ on:
         default: './artifacts'
       build-cmd:
         type: string
-        description: The script to run to build the image
+        description: The command or script to run to build the image
         required: false
-        default: './scripts/docker_build.sh'
       local-image-tag:
         type: string
         description: The tag applied by the `just docker-build` recipe
