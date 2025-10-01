@@ -35,7 +35,7 @@ on:
       build-cmd:
         type: string
         description: The command or script to run to build the image
-        required: false
+        required: true
       local-image-tag:
         type: string
         description: The tag applied by the `just docker-build` recipe
@@ -53,6 +53,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v4
+        with:
+          version: latest
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+        with:
+          version: latest
 
       - name: AWS Login
         id: aws-login
