@@ -11,9 +11,8 @@ inputs:
     required: false
     default: us-west-2
   env-name:
-    description: Environment name used for role/repo naming (e.g., dev, prod)
-    required: false
-    default: dev
+    description: Environment name used for role/repo naming (e.g., test, play, stage, prod)
+    required: true
   debug-oidc:
     description: Enable debug logging for OIDC
     required: false

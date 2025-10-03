@@ -5,9 +5,8 @@ description: |
 
 inputs:
   env-name:
-    description: Environment name used for role/repo naming (e.g., dev, play, stage, prod)
-    required: false
-    default: dev
+    description: Environment name used for role/repo naming (e.g., test, play, stage, prod)
+    required: true
   component:
     description: >-
       Component name being built (e.g., api, worker).
