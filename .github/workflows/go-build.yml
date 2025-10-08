@@ -54,7 +54,7 @@ jobs:
           version: latest
 
       - name: Setup Just
-        uses: herdkey/github-actions/.github/actions/setup-just@v1
+        uses: savisec/github-actions/.github/actions/setup-just@v1
         with:
           just-common-ref: ${{ inputs.just-common-ref }}
 
