@@ -42,7 +42,7 @@ jobs:
       # e.g., v1 -> v1.2.3 and v1.2 -> v1.2.3
       - name: Retag major & minor
         if: steps.bump.outputs.new_tag != ''
-        uses: herdkey/github-actions/.github/actions/move-major-tags@v1
+        uses: savisec/github-actions/.github/actions/move-major-tags@v1
         with:
           semver_tag: ${{ steps.bump.outputs.new_tag }}
           update_minor: "true"

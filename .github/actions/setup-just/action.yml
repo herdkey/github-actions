@@ -15,7 +15,7 @@ runs:
     - name: Check out repository
       uses: actions/checkout@v5
       with:
-        repository: herdkey/just-common
+        repository: savisec/just-common
         path: just-common-tmp
         ref: ${{ inputs.just-common-ref }}
         fetch-depth: 1
