@@ -5,6 +5,10 @@ inputs:
     description: "The ref of just-common to use"
     required: false
     default: v1
+  working-directory:
+    description: "The working directory to run in"
+    required: false
+    default: .
 
 runs:
   using: composite
@@ -16,7 +20,7 @@ runs:
       uses: actions/checkout@v5
       with:
         repository: savisec/just-common
-        path: just-common-tmp
+        path: ${{ inputs.working-directory }}/just-common-tmp
         ref: ${{ inputs.just-common-ref }}
         fetch-depth: 1
         sparse-checkout: |
@@ -24,6 +28,7 @@ runs:
 
     - name: Move
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         # Move justfiles to .justfiles
         mv -f just-common-tmp/justfiles .justfiles
@@ -35,6 +40,7 @@ runs:
 
     - name: Install direnv
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         curl -sfL https://direnv.net/install.sh | bash
         echo "$HOME/.local/bin" >> $GITHUB_PATH
@@ -42,6 +48,7 @@ runs:
     # https://github.com/direnv/direnv/blob/master/docs/github-actions.md
     - name: Load environment variables
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: |
         direnv allow .
         direnv export gha > "$GITHUB_ENV"
