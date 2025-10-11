@@ -39,6 +39,25 @@ on:
         type: string
         description: The tag applied by the `just docker-build` recipe
         required: true
+    outputs:
+      branch-tag:
+        description: Full ECR URI with branch tag (mutable, e.g., 123456.dkr.ecr.us-west-2.amazonaws.com/test/repo/api:main)
+        value: ${{ jobs.docker-build-push.outputs.branch-tag }}
+      sha-tag:
+        description: Full ECR URI with SHA tag (immutable, e.g., 123456.dkr.ecr.us-west-2.amazonaws.com/test/repo/api:abc1234)
+        value: ${{ jobs.docker-build-push.outputs.sha-tag }}
+      ecr-registry:
+        description: ECR registry URL (e.g., 123456.dkr.ecr.us-west-2.amazonaws.com)
+        value: ${{ jobs.docker-build-push.outputs.ecr-registry }}
+      ecr-repository:
+        description: ECR repository name (e.g., test/repo/api)
+        value: ${{ jobs.docker-build-push.outputs.ecr-repository }}
+      sha-version:
+        description: Short SHA of the commit (e.g., abc1234)
+        value: ${{ jobs.docker-build-push.outputs.short-sha }}
+      branch-version:
+        description: Sanitized branch name (e.g., main, feature-branch)
+        value: ${{ jobs.docker-build-push.outputs.sanitized-branch }}
 
 jobs:
   docker-build-push:
@@ -47,6 +66,13 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    outputs:
+      branch-tag: ${{ steps.ecr-setup.outputs.branch-tag }}
+      sha-tag: ${{ steps.ecr-setup.outputs.sha-tag }}
+      ecr-registry: ${{ steps.ecr-setup.outputs.ecr-registry }}
+      ecr-repository: ${{ steps.ecr-setup.outputs.ecr-repository }}
+      short-sha: ${{ steps.ecr-setup.outputs.short-sha }}
+      sanitized-branch: ${{ steps.ecr-setup.outputs.sanitized-branch }}
     env:
       env_name: test
     steps:
